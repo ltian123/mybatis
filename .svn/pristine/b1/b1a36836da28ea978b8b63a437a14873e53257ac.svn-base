@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="dao.IOrderDao">
+
+	<resultMap type="order" id="orderMapper">
+		<id property="id" column="o.id"/>
+		<result property="no" column="o.no"/>
+		<collection property="items" ofType="item">
+			<id property="id" column="i.id"/>
+			<result property="name" column="i.name"/>
+			<result property="num" column="i.num"/>
+		</collection>
+	</resultMap>
+	
+	<resultMap type="order" id="orderMapper2">
+		<id property="id" column="id"/>
+		<result property="no" column="no"/>
+		<collection property="items" ofType="item" column="id" select="dao.IItemDao.selectById">
+		</collection>
+	</resultMap>
+
+	<sql id="orderColumn">
+		o.id "o.id",
+		o.no "o.no",
+		i.id "i.id",
+		i.name "i.name",
+		i.num "i.num"
+	</sql>
+
+	<insert id="insertOrder" parameterType="order" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		insert into t_order
+			(no)
+		values
+			(#{no})
+	</insert>
+	
+	<select id="selectById" parameterType="int" resultMap="orderMapper">
+		select 
+		<include refid="orderColumn"></include>
+		from t_order o
+		join t_item i
+		on i.order_id = o.id
+		where o.id = #{id}
+	</select>
+	
+	<select id="selectById2" parameterType="int" resultMap="orderMapper2">
+		select *
+		from t_order
+		where id = #{id}
+	</select>
+
+</mapper>

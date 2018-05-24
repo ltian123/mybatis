@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="dao.IEmpDao">
+	
+	<resultMap type="emp" id="empMapper">
+		<id property="id" column="id" />
+		<result property="name" column="name"/>
+		<result property="salary" column="salary"/>
+		<association property="dept" column="dept_id" javaType="Dept" select="dao.IDeptDao.selectById">
+		</association>
+	</resultMap>
+	
+	<resultMap type="emp" id="empMapper2">
+		<id property="id" column="e.id" />
+		<result property="name" column="e.name"/>
+		<result property="salary" column="e.salary"/>
+		<association property="dept" column="dept_id" javaType="Dept" resultMap="dao.IDeptDao.deptMapper">
+		</association>
+	</resultMap>
+	
+	<sql id="empColumn">
+		e.id 'e.id',
+		e.name 'e.name',
+		e.salary 'e.salary',
+		d.id 'd.id',
+		d.name 'd.name'
+	</sql>
+	
+	<insert id="insertEmp" parameterType="emp">
+		insert into t_emp
+			(name,salary,dept_id)
+		values
+			(#{name},#{salary},#{dept.id})
+	</insert>
+	
+	
+	<!-- 不建议使用 -->
+	<select id="selectById" parameterType="int" resultMap="empMapper">
+		select id,name,salary,dept_id
+		from t_emp 
+		where id = #{id}
+	</select>
+	
+	<!-- N+1问题,查一次emp表的信息,
+	根据emp中的数据
+	有几个员工就需要根据这些员工的dcept_id去dept表查询对应的部门信息
+	有N个员工,就得去查询N次dept表
+	加上原来查询emp的次数,一共有N+1次 
+	-->
+	<select id="selectAll" resultMap="empMapper">
+		select id,name,salary,dept_id
+		from t_emp 
+	</select>
+	
+	
+	<select id="selectById2" parameterType="int" resultMap="empMapper2">
+		select <include refid="empColumn"></include>
+		from t_emp e
+		join t_dept d 
+		on e.dept_id = d.id
+		where e.id = #{id}
+	</select>
+	
+	
+	
+</mapper>

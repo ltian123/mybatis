@@ -1,0 +1,8 @@
+package dao;
+
+import entity.Emp;
+
+public interface IEmpDao {
+
+	public void insertEmp(Emp emp);
+}

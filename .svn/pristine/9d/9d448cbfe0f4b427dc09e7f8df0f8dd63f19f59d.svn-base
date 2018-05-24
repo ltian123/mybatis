@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="dao.IDeptDao">
+
+	<resultMap type="dept" id="deptMapper">
+		<id property="id" column="d.id"/>
+		<result property="name" column="d.name"/>
+	</resultMap>
+
+	<insert id="insertDept" parameterType="dept" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		insert into t_dept
+			(name)
+		values
+			(#{name})
+	</insert>
+
+	
+	<select id="selectById" parameterType="int" resultType="dept">
+		select id,name
+		from t_dept
+		where id = #{id}
+	</select>
+	
+	
+	
+
+</mapper>

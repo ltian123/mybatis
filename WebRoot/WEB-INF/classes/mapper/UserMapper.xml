@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="dao.IUserDao">
+
+	<sql id="userColumn">
+	id,
+	username,
+	password,
+	phone
+	</sql>
+
+	<resultMap type="entity.User" id="userMapper">
+		<id property="id" column="user_id" />
+		<result property="username" column="user_username" />
+		<result property="password" column="user_password" />
+		<result property="phone" column="user_phone" />
+	</resultMap>
+
+	<select id="selectById" parameterType="int" resultType="entity.User">
+		select id,username,password,phone
+		from t_user 
+		where id = #{id}
+	</select>
+	
+	<select id="selectById2" parameterType="int" resultMap="userMapper">
+		select user_id,user_username,user_password,user_phone
+		from t_user2 
+		where user_id = #{id}
+	</select>
+	
+	<select id="selectById3" parameterType="int" resultType="user">
+		select user_id id,
+		user_username username,
+		user_password password,
+		user_phone phone
+		from t_user2
+		where user_id = #{id}
+	</select>
+	
+	<select id="selectAll" resultType="user">
+		select id,username,password,phone
+		from t_user
+	</select>
+	
+	<select id="selectByPhone" parameterType="string" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user
+		where phone = #{phone}
+	</select>
+	
+	<select id="selectUserByUsernameAndPassword" parameterType="user" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user 
+		where username = #{username}
+		and password = #{password}
+	</select>
+	
+	<select id="selectUserByUsernameAndPassword2" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user 
+		where username = #{0}
+		and password = #{1}
+	</select>
+	
+	<insert id="insertUser" parameterType="user">
+		insert into t_user
+			(username,password,phone)
+		values
+			(#{username},#{password},#{phone})
+	</insert>
+	
+	<insert id="insertUser2" parameterType="user" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		insert into t_user
+			(username,password,phone)
+		values
+			(#{username},#{password},#{phone})
+	</insert>
+	
+	<update id="updateById" parameterType="user">
+		update t_user
+			set username=#{username},
+			password=#{password},
+			phone=#{phone}
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="int">
+		delete from t_user
+		where id = #{id}
+	</delete>
+	
+	<!-- 动态sql之if -->
+	<select id="selectByParams" parameterType="user" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user 
+		where 1=1
+		<if test="id!=null">
+			and id = #{id}
+		</if>
+		<if test="username!=null">
+			and username = #{username}
+		</if>
+		<if test="password!=null">
+			and password = #{password}
+		</if>
+		<if test="phone!=null">
+			and phone=#{phone}
+		</if>
+		
+	</select>
+
+
+	<!-- 动态sql之choose -->
+	<select id="selectByParams2" parameterType="user" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user 
+		where 1=1
+		<choose>
+			<when test="id!=null">
+				and id = #{id}
+			</when>
+			<when test="username!=null">
+				and username = #{username}
+			</when>
+			<when test="password!=null">
+				and password = #{password}
+			</when>
+			<otherwise>
+				and phone = #{phone}
+			</otherwise>
+		
+		</choose>
+	</select>
+
+	<!-- 动态sql之where -->
+	<select id="selectByParams3" parameterType="user" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user
+		<where>
+			<if test="id!=null">
+				and id = #{id}
+			</if>
+			<if test="username!=null">
+				or username = #{username}
+			</if>
+			<if test="password!=null">
+				and password = #{password}
+			</if>
+			<if test="phone!=null">
+				and phone=#{phone}
+			</if>
+		</where>
+	</select>
+
+	<!-- 动态sql之trim -->
+	<select id="selectByParams4" parameterType="user" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user 
+		<trim prefix="where" prefixOverrides="and |or">
+			<if test="id!=null">
+				and id = #{id}
+			</if>
+			<if test="username!=null">
+				or username = #{username}
+			</if>
+			<if test="password!=null">
+				and password = #{password}
+			</if>
+			<if test="phone!=null">
+				and phone=#{phone}
+			</if>
+		</trim>
+	</select>
+	
+	
+	<update id="updateById2" parameterType="user">
+		update t_user
+		<trim prefix="set" suffixOverrides=",">
+			<if test="username!=null">
+				username = #{username},
+			</if>
+			<if test="password!=null">
+				password = #{password},
+			</if>
+			<if test="phone!=null">
+				phone = #{phone},
+			</if>
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<!-- 动态sql之set -->
+	<update id="updateById3" parameterType="user">
+		update t_user
+		<set>
+			<if test="username!=null">
+				username = #{username},
+			</if>
+			<if test="password!=null">
+				password = #{password},
+			</if>
+			<if test="phone!=null">
+				phone = #{phone}
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	<!-- 动态sql之foreach -->
+	<select id="selectByEach" resultType="user">
+		select <include refid="userColumn"></include>
+		from t_user 
+		where id in 
+		<foreach collection="list" item="item" index="i" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	
+	</select>
+	
+	
+</mapper>
